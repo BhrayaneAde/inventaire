@@ -74,27 +74,44 @@ app.get('/api/inventaire', (req, res) => {
   });
 });
 
+
 // PUT : Modifier un écran existant par ID
 app.put('/api/inventaire/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
   const updatedData = req.body;
 
+  console.log('➡️ Reçu une requête PUT pour ID:', id);
+  console.log('📦 Données reçues:', updatedData);
+
   if (isNaN(id) || typeof updatedData !== 'object' || Array.isArray(updatedData)) {
+    console.error('❌ ID invalide ou données incorrectes');
     return res.status(400).json({ message: 'Données invalides' });
   }
 
   const inventaire = lireInventaire();
+  console.log('📁 Inventaire actuel:', inventaire);
+
   const index = inventaire.findIndex(item => item.id === id);
+  console.log('🔍 Index trouvé:', index);
 
   if (index === -1) {
+    console.warn('⚠️ Aucun élément trouvé avec cet ID');
     return res.status(404).json({ message: 'Élément non trouvé' });
   }
 
   inventaire[index] = { id, ...updatedData };
-  ecrireInventaire(inventaire);
+  console.log('✅ Données mises à jour:', inventaire[index]);
 
-  res.json({ message: 'Écran modifié avec succès', data: inventaire[index] });
+  try {
+    ecrireInventaire(inventaire);
+    console.log('💾 Inventaire mis à jour avec succès dans le fichier');
+    res.json({ message: 'Écran modifié avec succès', data: inventaire[index] });
+  } catch (err) {
+    console.error('💥 Erreur lors de l’écriture du fichier:', err);
+    res.status(500).json({ message: 'Erreur serveur', error: err.message });
+  }
 });
+
 
 app.listen(PORT, () => {
   console.log(`✅ Serveur démarré sur http://localhost:${PORT}`);

@@ -232,7 +232,9 @@
           alert("Veuillez remplir tous les champs obligatoires (Marque, Modèle, Taille).");
           return;
         }
-        await modifierEcranServeur(ecran._id, newEcran);
+        console.log('Modifier écran id:', ecran.id);
+await modifierEcranServeur(ecran.id, newEcran);
+        afficherInventaire();
       };
       tdAction.appendChild(saveBtn);
 
