@@ -86,7 +86,7 @@
     <input type="text" id="taille" placeholder="Ex: 24 pouces" required />
 
     <label for="quantite">Quantité :</label>
-    <input type="number" id="quantite" min="0" value="0" required/>
+    <input type="number" id="quantite" min="0" value="0" required />
 
     <button type="submit">Ajouter écran</button>
   </form>
@@ -117,7 +117,7 @@
       chargerInventaireDepuisServeur();
     };
 
-    const BASE_URL = window.location.origin;
+    const BASE_URL = "https://inventaire-ixzj.onrender.com";
 
     async function chargerInventaireDepuisServeur() {
       try {
@@ -166,7 +166,7 @@
       const marque = document.getElementById("marque").value.trim();
       const modele = document.getElementById("modele").value.trim();
       const taille = document.getElementById("taille").value.trim();
-      const quantite = parseInt(document.getElementById("quantite").value) || 1;
+      const quantite = parseInt(document.getElementById("quantite").value) || 0;
 
       // Validation simple
       if (!marque || !modele || !taille) {
