@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventaire des Écrans</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-5xl mx-auto bg-white rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold text-center mb-6">📺 Inventaire des Écrans - Parc Informatique</h1>
+        <div class="mb-6 bg-gray-50 p-4 rounded">
+            <h3 class="font-semibold mb-2">Ajouter un nouvel écran</h3>
+            <div class="flex flex-wrap gap-4 mb-2">
+                <input type="file" id="image" accept="image/*" class="block">
+                <input type="text" id="equipement" placeholder="Équipement" class="border rounded px-2 py-1 flex-1">
+                <input type="text" id="marque" placeholder="Marque" class="border rounded px-2 py-1 flex-1">
+                <input type="text" id="modele" placeholder="Modèle" class="border rounded px-2 py-1 flex-1">
+                <input type="text" id="taille" placeholder="Taille" class="border rounded px-2 py-1 w-24">
+                <input type="number" id="quantite" min="1" value="1" class="border rounded px-2 py-1 w-20">
+                <button onclick="ajouterEcran()" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-800">Ajouter</button>
+            </div>
+        </div>
+        <div class="flex gap-2 mb-4">
+            <button onclick="exporterExcel()" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-800">Exporter Excel</button>
+            <button onclick="sauvegarderLocal()" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700">Sauvegarder</button>
+            <button onclick="chargerSauvegarde()" class="bg-blue-400 text-white px-3 py-1 rounded hover:bg-blue-600">Charger</button>
+            <button onclick="viderInventaire()" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700">Vider</button>
+        </div>
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="bg-blue-600 text-white">
+                    <th class="p-2">Image</th>
+                    <th class="p-2">Équipement</th>
+                    <th class="p-2">Marque</th>
+                    <th class="p-2">Modèle</th>
+                    <th class="p-2">Taille</th>
+                    <th class="p-2">Quantité</th>
+                    <th class="p-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="inventaire-body"></tbody>
+        </table>
+    </div>
+    <script>
+        let inventaire = [
+            {
+                id: 1,
+                image: "img/hp_v24ie_g5_fhd.jpg",
+                equipement: "Ecran",
+                marque: "HP",
+                modele: "hp V24ie G5 FHD",
+                taille: "24",
+                quantite: 1
+            },
+            {
+                id: 2,
+                image: "img/hp_n246v.jpg",
+                equipement: "Ecran",
+                marque: "HP",
+                modele: "hp n246v",
+                taille: "23.8",
+                quantite: 1
+            },
+            {
+                id: 3,
+                image: "img/hp_e23_g4_fhd.jpg",
+                equipement: "Ecran",
+                marque: "HP",
+                modele: "hp e23 g4 fhd",
+                taille: "23",
+                quantite: 24
+            },
+            // Ajoute les autres modèles ici, en associant le bon chemin image
+        ];
+
+        window.onload = afficherInventaire;
+
+        function ajouterEcran() {
+            const imageFile = document.getElementById('image').files[0];
+            const equipement = document.getElementById('equipement').value.trim();
+            const marque = document.getElementById('marque').value.trim();
+            const modele = document.getElementById('modele').value.trim();
+            const taille = document.getElementById('taille').value.trim();
+            const quantite = parseInt(document.getElementById('quantite').value) || 1;
+
+            if (!marque || !modele || !taille) {
+                alert('Veuillez remplir tous les champs obligatoires (Marque, Modèle, Taille)');
+                return;
+            }
+
+            let image = null;
+            if (imageFile) {
+                image = URL.createObjectURL(imageFile);
+            }
+
+            inventaire.push({
+                id: Date.now(),
+                image,
+                equipement,
+                marque,
+                modele,
+                taille,
+                quantite
+            });
+            afficherInventaire();
+            document.getElementById('image').value = '';
+            document.getElementById('equipement').value = '';
+            document.getElementById('marque').value = '';
+            document.getElementById('modele').value = '';
+            document.getElementById('taille').value = '';
+            document.getElementById('quantite').value = '1';
+        }
+
+        function afficherInventaire() {
+            const tbody = document.getElementById('inventaire-body');
+            if (inventaire.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-gray-500 italic py-8">Aucun écran ajouté.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = inventaire.map(ecran => `
+                <tr class="even:bg-gray-50">
+                    <td class="p-2">
+                        ${ecran.image ? `<img src="${ecran.image}" alt="${ecran.modele}" class="w-24 h-20 object-contain rounded">` : '<span class="text-gray-400">Aucune image</span>'}
+                    </td>
+                    <td class="p-2">${ecran.equipement || '-'}</td>
+                    <td class="p-2">${ecran.marque}</td>
+                    <td class="p-2">${ecran.modele}</td>
+                    <td class="p-2">${ecran.taille}</td>
+                    <td class="p-2">
+                        <input type="number" min="1" value="${ecran.quantite}" class="border rounded w-16 text-center" onchange="modifierQuantite(${ecran.id}, this.value)">
+                    </td>
+                    <td class="p-2">
+                        <button class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-700" onclick="supprimerEcran(${ecran.id})">Supprimer</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function modifierQuantite(id, val) {
+            const q = parseInt(val);
+            if (q < 1) return;
+            const ecran = inventaire.find(e => e.id === id);
+            if (ecran) ecran.quantite = q;
+        }
+
+        function supprimerEcran(id) {
+            if (confirm('Supprimer cet écran ?')) {
+                inventaire = inventaire.filter(e => e.id !== id);
+                afficherInventaire();
+            }
+        }
+
+        function viderInventaire() {
+            if (confirm('Vider tout l\'inventaire ?')) {
+                inventaire = [];
+                afficherInventaire();
+                try { localStorage.removeItem('inventaireEcrans'); } catch {}
+            }
+        }
+
+        function exporterExcel() {
+            if (inventaire.length === 0) return alert('Aucun écran à exporter');
+            const donnees = [
+                ['Image', 'Équipement', 'Marque', 'Modèle', 'Taille', 'Quantité']
+            ];
+            inventaire.forEach(e => {
+                donnees.push([
+                    e.image ? 'Oui' : 'Non',
+                    e.equipement || '',
+                    e.marque,
+                    e.modele,
+                    e.taille,
+                    e.quantite
+                ]);
+            });
+            let csv = "data:text/csv;charset=utf-8,\uFEFF";
+            donnees.forEach(l => { csv += l.map(c => `"${c}"`).join(',') + '\n'; });
+            const a = document.createElement('a');
+            a.href = encodeURI(csv);
+            a.download = `inventaire_ecrans_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+
+        function sauvegarderLocal() {
+            try {
+                localStorage.setItem('inventaireEcrans', JSON.stringify(inventaire));
+                alert('Inventaire sauvegardé !');
+            } catch {}
+        }
+
+        function chargerSauvegarde() {
+            try {
+                const sauvegarde = localStorage.getItem('inventaireEcrans');
+                if (sauvegarde) {
+                    inventaire = JSON.parse(sauvegarde);
+                    afficherInventaire();
+                    alert('Inventaire chargé !');
+                }
+            } catch {}
+        }
+    </script>
+</body>
+</html>

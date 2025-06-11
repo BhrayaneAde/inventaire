@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inventaire Écrans</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 20px;
+      align-items: center;
+    }
+    label {
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="file"] {
+      width: 100%;
+      padding: 6px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      grid-column: 1 / -1;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    img {
+      max-width: 80px;
+      max-height: 80px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gestion Inventaire Écrans</h1>
+
+  <form id="form-inventaire" autocomplete="off">
+    <label for="image">Image (optionnelle) :</label>
+    <input type="file" id="image" accept="image/*" />
+
+    <label for="equipement">Équipement :</label>
+    <input type="text" id="equipement" placeholder="Type d'équipement" />
+
+    <label for="marque">Marque * :</label>
+    <input type="text" id="marque" placeholder="Marque" required />
+
+    <label for="modele">Modèle * :</label>
+    <input type="text" id="modele" placeholder="Modèle" required />
+
+    <label for="taille">Taille * :</label>
+    <input type="text" id="taille" placeholder="Ex: 24 pouces" required />
+
+    <label for="quantite">Quantité :</label>
+    <input type="number" id="quantite" min="1" value="1" />
+
+    <button type="submit">Ajouter écran</button>
+  </form>
+
+  <table id="table-inventaire">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Équipement</th>
+        <th>Marque</th>
+        <th>Modèle</th>
+        <th>Taille</th>
+        <th>Quantité</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let inventaire = [];
+
+    document.getElementById("form-inventaire").addEventListener("submit", function(event) {
+      event.preventDefault();
+      ajouterEcran();
+    });
+
+    window.onload = () => {
+      chargerInventaireDepuisServeur();
+    };
+
+    async function chargerInventaireDepuisServeur() {
+      try {
+        const response = await fetch("http://localhost:3000/api/inventaire");
+        if (response.ok) {
+          inventaire = await response.json();
+          afficherInventaire();
+        } else {
+          console.error("Erreur de récupération des données");
+        }
+      } catch (error) {
+        console.error("Erreur réseau :", error);
+      }
+    }
+
+    function afficherInventaire() {
+      const tbody = document.querySelector("#table-inventaire tbody");
+      tbody.innerHTML = "";
+      inventaire.forEach(ecran => {
+        const tr = document.createElement("tr");
+
+        const tdImage = document.createElement("td");
+        if (ecran.image) {
+          const img = document.createElement("img");
+          img.src = ecran.image;
+          img.alt = "Image écran";
+          tdImage.appendChild(img);
+        } else {
+          tdImage.textContent = "Aucune image";
+        }
+        tr.appendChild(tdImage);
+
+        ["equipement", "marque", "modele", "taille", "quantite"].forEach(field => {
+          const td = document.createElement("td");
+          td.textContent = ecran[field] || "-";
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function ajouterEcran() {
+      const imageFile = document.getElementById("image").files[0];
+      const equipement = document.getElementById("equipement").value.trim();
+      const marque = document.getElementById("marque").value.trim();
+      const modele = document.getElementById("modele").value.trim();
+      const taille = document.getElementById("taille").value.trim();
+      const quantite = parseInt(document.getElementById("quantite").value) || 1;
+
+      // Validation simple
+      if (!marque || !modele || !taille) {
+        alert("Veuillez remplir tous les champs obligatoires (Marque, Modèle, Taille).");
+        return;
+      }
+
+      if (imageFile) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          const image = reader.result; // base64
+          envoyerEcranServeur({
+            image,
+            equipement,
+            marque,
+            modele,
+            taille,
+            quantite,
+          });
+        };
+        reader.readAsDataURL(imageFile);
+      } else {
+        envoyerEcranServeur({
+          image: null,
+          equipement,
+          marque,
+          modele,
+          taille,
+          quantite,
+        });
+      }
+    }
+
+    async function envoyerEcranServeur(ecran) {
+      try {
+        const response = await fetch("http://localhost:3000/api/inventaire", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(ecran),
+        });
+        if (response.ok) {
+          // Recharge l'inventaire depuis le serveur
+          chargerInventaireDepuisServeur();
+
+          // Reset formulaire
+          document.getElementById("form-inventaire").reset();
+        } else {
+          alert("Erreur lors de l'ajout de l'écran.");
+        }
+      } catch (error) {
+        alert("Erreur réseau lors de l'ajout.");
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
