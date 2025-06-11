@@ -64,6 +64,20 @@
       max-height: 80px;
       object-fit: contain;
     }
+    .edit-btn, .save-btn, .cancel-btn {
+      padding: 4px 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+    .edit-btn { background: #ffc107; color: #222; }
+    .edit-btn:hover { background: #e0a800; }
+    .save-btn { background: #28a745; color: #fff; }
+    .save-btn:hover { background: #218838; }
+    .cancel-btn { background: #dc3545; color: #fff; }
+    .cancel-btn:hover { background: #c82333; }
   </style>
 </head>
 <body>
@@ -100,6 +114,7 @@
         <th>Modèle</th>
         <th>Taille</th>
         <th>Quantité</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -136,8 +151,9 @@
     function afficherInventaire() {
       const tbody = document.querySelector("#table-inventaire tbody");
       tbody.innerHTML = "";
-      inventaire.forEach(ecran => {
+      inventaire.forEach((ecran, index) => {
         const tr = document.createElement("tr");
+        tr.setAttribute("data-index", index);
 
         const tdImage = document.createElement("td");
         if (ecran.image) {
@@ -156,8 +172,95 @@
           tr.appendChild(td);
         });
 
+        // Action column
+        const tdAction = document.createElement("td");
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Éditer";
+        editBtn.className = "edit-btn";
+        editBtn.onclick = () => activerEdition(tr, ecran, index);
+        tdAction.appendChild(editBtn);
+        tr.appendChild(tdAction);
+
         tbody.appendChild(tr);
       });
+    }
+
+    function activerEdition(tr, ecran, index) {
+      tr.innerHTML = "";
+
+      // Image
+      const tdImage = document.createElement("td");
+      if (ecran.image) {
+        const img = document.createElement("img");
+        img.src = ecran.image;
+        img.alt = "Image écran";
+        tdImage.appendChild(img);
+      } else {
+        tdImage.textContent = "Aucune image";
+      }
+      tr.appendChild(tdImage);
+
+      // Champs éditables
+      ["equipement", "marque", "modele", "taille", "quantite"].forEach(field => {
+        const td = document.createElement("td");
+        const input = document.createElement(field === "quantite" ? "input" : "input");
+        input.type = field === "quantite" ? "number" : "text";
+        input.value = ecran[field] || "";
+        input.style.width = "90%";
+        if (field === "quantite") input.min = 0;
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+
+      // Actions: Save & Cancel
+      const tdAction = document.createElement("td");
+      const saveBtn = document.createElement("button");
+      saveBtn.textContent = "Enregistrer";
+      saveBtn.className = "save-btn";
+      saveBtn.onclick = async () => {
+        const tds = tr.querySelectorAll("td");
+        const newEcran = {
+          image: ecran.image,
+          equipement: tds[1].querySelector("input").value.trim(),
+          marque: tds[2].querySelector("input").value.trim(),
+          modele: tds[3].querySelector("input").value.trim(),
+          taille: tds[4].querySelector("input").value.trim(),
+          quantite: parseInt(tds[5].querySelector("input").value) || 0,
+        };
+        // Validation
+        if (!newEcran.marque || !newEcran.modele || !newEcran.taille) {
+          alert("Veuillez remplir tous les champs obligatoires (Marque, Modèle, Taille).");
+          return;
+        }
+        await modifierEcranServeur(ecran._id, newEcran);
+      };
+      tdAction.appendChild(saveBtn);
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.textContent = "Annuler";
+      cancelBtn.className = "cancel-btn";
+      cancelBtn.onclick = () => afficherInventaire();
+      tdAction.appendChild(cancelBtn);
+
+      tr.appendChild(tdAction);
+    }
+
+    async function modifierEcranServeur(id, ecran) {
+      try {
+      const response = await fetch(`${BASE_URL}/api/inventaire/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ecran),
+      });
+      if (response.ok) {
+        chargerInventaireDepuisServeur();
+      } else {
+        alert("Erreur lors de la modification.");
+      }
+      } catch (error) {
+      alert("Erreur réseau lors de la modification.");
+      console.error(error);
+      }
     }
 
     function ajouterEcran() {
