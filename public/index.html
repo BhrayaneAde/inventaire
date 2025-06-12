@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
   <title>Inventaire Écrans</title>
   <style>
     body {
@@ -79,6 +80,9 @@
     .cancel-btn { background: #dc3545; color: #fff; }
     .cancel-btn:hover { background: #c82333; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </head>
 <body>
   <h1>Gestion Inventaire Écrans</h1>
@@ -119,6 +123,17 @@
     </thead>
     <tbody></tbody>
   </table>
+  <div style="margin-top: 20px; text-align: center;">
+  <button onclick="exporterPDF()">Exporter en PDF</button>
+  <button onclick="telechargerJSON()">Télécharger JSON</button>
+</div>
+<div style="margin-top: 10px; text-align: center;">
+  <input type="file" id="importJsonInput" accept=".json" style="display: none;" onchange="importerJSON(event)">
+  <button onclick="document.getElementById('importJsonInput').click()">Importer JSON</button>
+</div>
+
+
+
 
   <script>
     let inventaire = [];
@@ -305,27 +320,129 @@ await modifierEcranServeur(ecran.id, newEcran);
       }
     }
 
-    async function envoyerEcranServeur(ecran) {
-      try {
-        const response = await fetch(`${BASE_URL}/api/inventaire`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(ecran),
-        });
-        if (response.ok) {
-          // Recharge l'inventaire depuis le serveur
-          chargerInventaireDepuisServeur();
+  async function envoyerEcranServeur(ecran) {
+    try {
+      const response = await fetch(`${BASE_URL}/api/inventaire`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(ecran),
+      });
+      if (response.ok) {
+        // Recharge l'inventaire depuis le serveur
+        chargerInventaireDepuisServeur();
 
-          // Reset formulaire
-          document.getElementById("form-inventaire").reset();
-        } else {
-          alert("Erreur lors de l'ajout de l'écran.");
-        }
-      } catch (error) {
-        alert("Erreur réseau lors de l'ajout.");
-        console.error(error);
+        // Reset formulaire
+        document.getElementById("form-inventaire").reset();
+      } else {
+        alert("Erreur lors de l'ajout de l'écran.");
       }
+    } catch (error) {
+      alert("Erreur réseau lors de l'ajout.");
+      console.error(error);
     }
+  }
+
+  // Exporter en PDF (avec images)
+  function exporterPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Inventaire Écrans", 70, 15);
+
+    const headers = [["Image", "Équipement", "Marque", "Modèle", "Taille", "Quantité"]];
+    const startY = 25;
+    let currentY = startY + 10;
+
+    // Largeur des colonnes pour placer les images
+    const colWidths = [25, 30, 30, 30, 25, 20];
+
+    // Dessiner l'en-tête
+    doc.setFontSize(12);
+    let x = 10;
+    headers[0].forEach((header, i) => {
+      doc.text(header, x, startY);
+      x += colWidths[i];
+    });
+
+    // Dessiner les lignes de données
+    inventaire.forEach((ecran, idx) => {
+      let x = 10;
+      let rowHeight = 12;
+      // Image
+      if (ecran.image) {
+        try {
+          doc.addImage(ecran.image, "JPEG", x, currentY - 6, 15, 15);
+        } catch (e) {
+          doc.text("Image", x, currentY);
+        }
+      } else {
+        doc.text("Aucune", x, currentY);
+      }
+      x += colWidths[0];
+
+      // Autres champs
+      [
+        ecran.equipement || "-",
+        ecran.marque || "-",
+        ecran.modele || "-",
+        ecran.taille || "-",
+        ecran.quantite != null ? String(ecran.quantite) : "0"
+      ].forEach((val, i) => {
+        doc.text(val, x, currentY);
+        x += colWidths[i + 1];
+      });
+
+      currentY += rowHeight;
+      // Sauter une page si besoin
+      if (currentY > 270) {
+        doc.addPage();
+        currentY = startY + 10;
+      }
+    });
+
+    doc.save("inventaire_ecrans.pdf");
+  }
+
+  // Télécharger JSON
+  function telechargerJSON() {
+    const blob = new Blob([JSON.stringify(inventaire, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "inventaire_ecrans.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Importer un fichier JSON
+  function importerJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+
+        // Valider que le fichier est bien un tableau d'écrans
+        if (Array.isArray(data)) {
+          inventaire = data;
+          afficherInventaire(); // Met à jour le tableau
+          alert("Importation réussie !");
+        } else {
+          alert("Fichier invalide. Le JSON doit contenir un tableau d'écrans.");
+        }
+      } catch (err) {
+        alert("Erreur lors de l'importation du JSON : " + err.message);
+      }
+    };
+
+    reader.readAsText(file);
+  }
+
   </script>
 </body>
 </html>
