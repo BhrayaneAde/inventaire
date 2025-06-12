@@ -3,90 +3,196 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
   <title>Inventaire Écrans</title>
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      max-width: 900px;
+      min-height: 100vh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
       text-align: center;
+      margin-top: 40px;
+      margin-bottom: 30px;
+      color: #2d3a4a;
+      letter-spacing: 2px;
+      font-size: 2.5rem;
+      text-shadow: 0 2px 8px #dbeafe;
     }
     form {
-      margin-bottom: 20px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px 0 rgba(60, 72, 88, 0.10);
+      padding: 32px 28px 18px 28px;
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 950px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px 20px;
+      gap: 18px 32px;
       align-items: center;
     }
     label {
-      font-weight: bold;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 2px;
     }
     input[type="text"],
     input[type="number"],
     input[type="file"] {
       width: 100%;
-      padding: 6px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
+      padding: 8px 10px;
+      border-radius: 7px;
+      border: 1px solid #cbd5e1;
       box-sizing: border-box;
+      background: #f1f5f9;
+      font-size: 1rem;
+      transition: border 0.2s;
     }
-    button {
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border: 1.5px solid #6366f1;
+      outline: none;
+      background: #fff;
+    }
+    button[type="submit"] {
       grid-column: 1 / -1;
-      padding: 10px;
-      background-color: #007bff;
+      padding: 12px;
+      background: linear-gradient(90deg, #6366f1 0%, #2563eb 100%);
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
       cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 2px 8px #dbeafe;
+      transition: background 0.2s;
     }
-    button:hover {
-      background-color: #0056b3;
+    button[type="submit"]:hover {
+      background: linear-gradient(90deg, #2563eb 0%, #6366f1 100%);
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .form-actions, .form-import {
+      grid-column: 1 / -1;
+      text-align: center;
       margin-top: 10px;
     }
+    .form-actions button, .form-import button {
+      margin: 0 6px;
+      padding: 8px 18px;
+      border-radius: 7px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 500;
+      background: #f1f5f9;
+      color: #2563eb;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      box-shadow: 0 1px 4px #e0e7ff;
+    }
+    .form-actions button:hover, .form-import button:hover {
+      background: #2563eb;
+      color: #fff;
+    }
+    table {
+      width: 98vw;
+      max-width: 1200px;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 0 auto 30px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px 0 rgba(60, 72, 88, 0.10);
+      overflow: hidden;
+    }
     th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 14px 10px;
       text-align: center;
       vertical-align: middle;
+      font-size: 1rem;
     }
     th {
-      background-color: #f0f0f0;
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    tr:last-child td {
+      border-bottom: none;
     }
     img {
       max-width: 80px;
       max-height: 80px;
       object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px #e0e7ff;
+      background: #f8fafc;
     }
     .edit-btn, .save-btn, .cancel-btn {
-      padding: 4px 10px;
-      font-size: 14px;
-      border-radius: 5px;
+      padding: 6px 14px;
+      font-size: 1rem;
+      border-radius: 7px;
       border: none;
       cursor: pointer;
       margin: 0 2px;
+      font-weight: 500;
+      box-shadow: 0 1px 4px #e0e7ff;
+      transition: background 0.2s, color 0.2s;
     }
-    .edit-btn { background: #ffc107; color: #222; }
-    .edit-btn:hover { background: #e0a800; }
-    .save-btn { background: #28a745; color: #fff; }
-    .save-btn:hover { background: #218838; }
-    .cancel-btn { background: #dc3545; color: #fff; }
-    .cancel-btn:hover { background: #c82333; }
+    .edit-btn { background: #fde68a; color: #7c4700; }
+    .edit-btn:hover { background: #fbbf24; color: #fff; }
+    .save-btn { background: #bbf7d0; color: #065f46; }
+    .save-btn:hover { background: #22c55e; color: #fff; }
+    .cancel-btn { background: #fecaca; color: #991b1b; }
+    .cancel-btn:hover { background: #ef4444; color: #fff; }
+    @media (max-width: 900px) {
+      form, table {
+        max-width: 98vw;
+        font-size: 0.98rem;
+      }
+      form {
+        padding: 18px 6px 10px 6px;
+        gap: 10px 10px;
+      }
+      th, td {
+        padding: 8px 4px;
+      }
+    }
+    @media (max-width: 600px) {
+      form {
+        grid-template-columns: 1fr;
+        gap: 10px 0;
+      }
+      .form-actions, .form-import {
+        margin-top: 8px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin-top: 18px;
+      }
+      table {
+        font-size: 0.92rem;
+      }
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <h1>Gestion Inventaire Écrans</h1>
-
   <form id="form-inventaire" autocomplete="off">
     <label for="image">Image (optionnelle) :</label>
     <input type="file" id="image" accept="image/*" />
@@ -107,8 +213,15 @@
     <input type="number" id="quantite" min="0" value="0" required />
 
     <button type="submit">Ajouter écran</button>
+    <div class="form-actions">
+      <button type="button" onclick="exporterPDF()">Exporter en PDF</button>
+      <button type="button" onclick="telechargerJSON()">Télécharger JSON</button>
+    </div>
+    <div class="form-import">
+      <input type="file" id="importJsonInput" accept=".json" style="display: none;" onchange="importerJSON(event)">
+      <button type="button" onclick="document.getElementById('importJsonInput').click()">Importer JSON</button>
+    </div>
   </form>
-
   <table id="table-inventaire">
     <thead>
       <tr>
@@ -123,19 +236,8 @@
     </thead>
     <tbody></tbody>
   </table>
-  <div style="margin-top: 20px; text-align: center;">
-  <button onclick="exporterPDF()">Exporter en PDF</button>
-  <button onclick="telechargerJSON()">Télécharger JSON</button>
-</div>
-<div style="margin-top: 10px; text-align: center;">
-  <input type="file" id="importJsonInput" accept=".json" style="display: none;" onchange="importerJSON(event)">
-  <button onclick="document.getElementById('importJsonInput').click()">Importer JSON</button>
-</div>
-
-
-
-
   <script>
+    // ... (le script JS reste inchangé)
     let inventaire = [];
 
     document.getElementById("form-inventaire").addEventListener("submit", function(event) {
@@ -247,8 +349,7 @@
           alert("Veuillez remplir tous les champs obligatoires (Marque, Modèle, Taille).");
           return;
         }
-        console.log('Modifier écran id:', ecran.id);
-await modifierEcranServeur(ecran.id, newEcran);
+        await modifierEcranServeur(ecran.id, newEcran);
         afficherInventaire();
       };
       tdAction.appendChild(saveBtn);
@@ -264,19 +365,19 @@ await modifierEcranServeur(ecran.id, newEcran);
 
     async function modifierEcranServeur(id, ecran) {
       try {
-      const response = await fetch(`${BASE_URL}/api/inventaire/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(ecran),
-      });
-      if (response.ok) {
-        chargerInventaireDepuisServeur();
-      } else {
-        alert("Erreur lors de la modification.");
-      }
+        const response = await fetch(`${BASE_URL}/api/inventaire/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(ecran),
+        });
+        if (response.ok) {
+          chargerInventaireDepuisServeur();
+        } else {
+          alert("Erreur lors de la modification.");
+        }
       } catch (error) {
-      alert("Erreur réseau lors de la modification.");
-      console.error(error);
+        alert("Erreur réseau lors de la modification.");
+        console.error(error);
       }
     }
 
@@ -320,129 +421,128 @@ await modifierEcranServeur(ecran.id, newEcran);
       }
     }
 
-  async function envoyerEcranServeur(ecran) {
-    try {
-      const response = await fetch(`${BASE_URL}/api/inventaire`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(ecran),
-      });
-      if (response.ok) {
-        // Recharge l'inventaire depuis le serveur
-        chargerInventaireDepuisServeur();
-
-        // Reset formulaire
-        document.getElementById("form-inventaire").reset();
-      } else {
-        alert("Erreur lors de l'ajout de l'écran.");
-      }
-    } catch (error) {
-      alert("Erreur réseau lors de l'ajout.");
-      console.error(error);
-    }
-  }
-
-  // Exporter en PDF (avec images)
-  function exporterPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("Inventaire Écrans", 70, 15);
-
-    const headers = [["Image", "Équipement", "Marque", "Modèle", "Taille", "Quantité"]];
-    const startY = 25;
-    let currentY = startY + 10;
-
-    // Largeur des colonnes pour placer les images
-    const colWidths = [25, 30, 30, 30, 25, 20];
-
-    // Dessiner l'en-tête
-    doc.setFontSize(12);
-    let x = 10;
-    headers[0].forEach((header, i) => {
-      doc.text(header, x, startY);
-      x += colWidths[i];
-    });
-
-    // Dessiner les lignes de données
-    inventaire.forEach((ecran, idx) => {
-      let x = 10;
-      let rowHeight = 12;
-      // Image
-      if (ecran.image) {
-        try {
-          doc.addImage(ecran.image, "JPEG", x, currentY - 6, 15, 15);
-        } catch (e) {
-          doc.text("Image", x, currentY);
-        }
-      } else {
-        doc.text("Aucune", x, currentY);
-      }
-      x += colWidths[0];
-
-      // Autres champs
-      [
-        ecran.equipement || "-",
-        ecran.marque || "-",
-        ecran.modele || "-",
-        ecran.taille || "-",
-        ecran.quantite != null ? String(ecran.quantite) : "0"
-      ].forEach((val, i) => {
-        doc.text(val, x, currentY);
-        x += colWidths[i + 1];
-      });
-
-      currentY += rowHeight;
-      // Sauter une page si besoin
-      if (currentY > 270) {
-        doc.addPage();
-        currentY = startY + 10;
-      }
-    });
-
-    doc.save("inventaire_ecrans.pdf");
-  }
-
-  // Télécharger JSON
-  function telechargerJSON() {
-    const blob = new Blob([JSON.stringify(inventaire, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "inventaire_ecrans.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  // Importer un fichier JSON
-  function importerJSON(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
+    async function envoyerEcranServeur(ecran) {
       try {
-        const data = JSON.parse(e.target.result);
+        const response = await fetch(`${BASE_URL}/api/inventaire`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(ecran),
+        });
+        if (response.ok) {
+          // Recharge l'inventaire depuis le serveur
+          chargerInventaireDepuisServeur();
 
-        // Valider que le fichier est bien un tableau d'écrans
-        if (Array.isArray(data)) {
-          inventaire = data;
-          afficherInventaire(); // Met à jour le tableau
-          alert("Importation réussie !");
+          // Reset formulaire
+          document.getElementById("form-inventaire").reset();
         } else {
-          alert("Fichier invalide. Le JSON doit contenir un tableau d'écrans.");
+          alert("Erreur lors de l'ajout de l'écran.");
         }
-      } catch (err) {
-        alert("Erreur lors de l'importation du JSON : " + err.message);
+      } catch (error) {
+        alert("Erreur réseau lors de l'ajout.");
+        console.error(error);
       }
-    };
+    }
 
-    reader.readAsText(file);
-  }
+    // Exporter en PDF (avec images)
+    function exporterPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Inventaire Écrans", 70, 15);
 
+      const headers = [["Image", "Équipement", "Marque", "Modèle", "Taille", "Quantité"]];
+      const startY = 25;
+      let currentY = startY + 10;
+
+      // Largeur des colonnes pour placer les images
+      const colWidths = [25, 30, 30, 30, 25, 20];
+
+      // Dessiner l'en-tête
+      doc.setFontSize(12);
+      let x = 10;
+      headers[0].forEach((header, i) => {
+        doc.text(header, x, startY);
+        x += colWidths[i];
+      });
+
+      // Dessiner les lignes de données
+      inventaire.forEach((ecran, idx) => {
+        let x = 10;
+        let rowHeight = 12;
+        // Image
+        if (ecran.image) {
+          try {
+            doc.addImage(ecran.image, "JPEG", x, currentY - 6, 15, 15);
+          } catch (e) {
+            doc.text("Image", x, currentY);
+          }
+        } else {
+          doc.text("Aucune", x, currentY);
+        }
+        x += colWidths[0];
+
+        // Autres champs
+        [
+          ecran.equipement || "-",
+          ecran.marque || "-",
+          ecran.modele || "-",
+          ecran.taille || "-",
+          ecran.quantite != null ? String(ecran.quantite) : "0"
+        ].forEach((val, i) => {
+          doc.text(val, x, currentY);
+          x += colWidths[i + 1];
+        });
+
+        currentY += rowHeight;
+        // Sauter une page si besoin
+        if (currentY > 270) {
+          doc.addPage();
+          currentY = startY + 10;
+        }
+      });
+
+      doc.save("inventaire_ecrans.pdf");
+    }
+
+    // Télécharger JSON
+    function telechargerJSON() {
+      const blob = new Blob([JSON.stringify(inventaire, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "inventaire_ecrans.json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Importer un fichier JSON
+    function importerJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+
+          // Valider que le fichier est bien un tableau d'écrans
+          if (Array.isArray(data)) {
+            inventaire = data;
+            afficherInventaire(); // Met à jour le tableau
+            alert("Importation réussie !");
+          } else {
+            alert("Fichier invalide. Le JSON doit contenir un tableau d'écrans.");
+          }
+        } catch (err) {
+          alert("Erreur lors de l'importation du JSON : " + err.message);
+        }
+      };
+
+      reader.readAsText(file);
+    }
   </script>
 </body>
 </html>
